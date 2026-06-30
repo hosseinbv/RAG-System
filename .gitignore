@@ -3,3 +3,8 @@ pages/
 data/
 UI-PLAN.md
 PLAN.md
+run-ui.txt
+*.log
+logs/
+__pycache__/
+*.py[cod]

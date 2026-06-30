@@ -140,21 +140,18 @@ Current services:
 Start the services with:
 
 ```bash
-cd /home/ubuntu/research/langgraph
 bash serve_models.sh all
 ```
 
 For evaluation, include the judge:
 
 ```bash
-cd /home/ubuntu/research/langgraph
 bash serve_models.sh eval
 ```
 
 Check service status:
 
 ```bash
-cd /home/ubuntu/research/langgraph
 bash serve_models.sh status
 ```
 
@@ -171,8 +168,7 @@ Logs are written under [logs/](logs/).
 The checked-in/generated data is already present on this machine. To rebuild from the raw HTML:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.ingest.build_corpus
+python -m langgraph_rag.ingest.build_corpus
 ```
 
 Then rebuild chunks:
@@ -190,6 +186,37 @@ python -m langgraph_rag.ingest.build_index
 Index building consumes `data/chunks.jsonl` and requires the embedding service on port `8002`.
 
 ## Run The Chatbot
+
+Browser UI:
+
+```bash
+streamlit run langgraph_rag/app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+```
+
+Then open:
+
+```text
+http://localhost:8501
+```
+
+The browser UI stores chats locally under:
+
+```text
+data/ui/sessions/
+```
+
+Saved sessions can be created, loaded, cleared, and deleted from the sidebar. Per-answer
+feedback is stored locally as append-only JSONL:
+
+```text
+data/ui/feedback.jsonl
+```
+
+Feedback records include the session/turn id, query, answer, citations, final context ids,
+source URLs, trace/metric fields, label, optional comment, and timestamp.
+
+The sidebar also has an Admin view for inspecting eval reports, A/B deltas, feedback records,
+sample answers, and source artifact paths.
 
 Single query:
 
@@ -223,7 +250,7 @@ python -m pytest -q
 Current verification status:
 
 ```text
-26 passed, 3 skipped
+46 passed, 3 skipped
 ```
 
 The skipped tests are gated integration/live-service checks. Unit tests do not require live

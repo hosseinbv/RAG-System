@@ -925,6 +925,24 @@ Added root `README.md` with:
   `reports/sample_answers_corpus_only.md`
 
 
+## UI Plan
+_2026-06-30_
+
+Added `UI-PLAN.md` as the tracking document for optional chat UI work.
+
+Initial workstreams are all marked **NOT DONE**:
+
+1. Transparent Chat UI
+2. Persistent Conversation Memory
+3. Human Feedback Loop
+4. Caching + Latency/Cost View
+5. Eval/Admin Dashboard
+
+Tracking rule: when a workstream is completed, update `UI-PLAN.md`, add tests under `tests/`
+when applicable, include any A/B or before/after comparison when meaningful, and append the
+implementation details to this report.
+
+
 ## Phase 4 — Evaluation (corpus_only)
 _2026-06-29 21:56:38_
 
@@ -1021,3 +1039,317 @@ grounded from hallucinated answers before we trust its scores below.)
 
 ### System
 - latency mean = 2119 ms · p90 = 4565 ms
+
+
+## UI Workstream 1 — Transparent Chat UI
+_2026-06-30_
+
+**Status: DONE.** Added a first local browser UI for chatting with the existing LangGraph RAG
+pipeline.
+
+Implemented:
+
+- `langgraph_rag/app/streamlit_app.py`: Streamlit chat UI.
+- `langgraph_rag/app/ui_adapter.py`: testable display-payload helpers that convert raw graph
+  outputs into UI-ready answer, citation, context, and trace structures.
+- `tests/test_ui_adapter.py`: no-live-service tests for UI helper behavior.
+- `requirements.txt`: added `streamlit>=1.36`.
+- `README.md`: added browser UI run command.
+- `UI-PLAN.md`: Workstream 1 marked **DONE**.
+
+UI behavior:
+
+- chat input plus in-session chat history
+- sidebar sample-question buttons
+- clear-chat control
+- cited answer display
+- expandable sources
+- expandable retrieved/final-context inspector with score, source type, product, page type, URL,
+  and chunk id
+- trace panel with top score, total latency, web trigger state, web result count, groundedness,
+  and raw trace
+- friendly model-service error message if the graph invocation fails
+
+Run command:
+
+```bash
+cd /home/ubuntu/research/langgraph
+/mnt/data/ubuntu/research/env/lang/bin/streamlit run langgraph_rag/app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
+```
+
+Current local server:
+
+- PID: `2369120`
+- URL: `http://localhost:8501`
+- Log: `logs/streamlit_ui.log`
+
+Verification:
+
+- Installed `streamlit 1.58.0` in `/mnt/data/ubuntu/research/env/lang`.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_ui_adapter.py -q`
+  -> **5 passed**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q`
+  -> **31 passed, 3 skipped**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m py_compile langgraph_rag/app/streamlit_app.py langgraph_rag/app/ui_adapter.py`
+  -> passed.
+- Streamlit startup log reports `Uvicorn server started on 0.0.0.0:8501`; `ss -ltnp` confirms
+  `streamlit` listening on port `8501`.
+
+A/B:
+
+- Not applicable for this workstream. The UI wraps the existing graph without changing retrieval,
+  reranking, generation, or evaluation behavior.
+
+Known limitations:
+
+- Conversation history is in Streamlit session memory only. Persistent sessions are Workstream 2.
+- No thumbs up/down logging yet. Feedback is Workstream 3.
+- No cache layer yet. Caching and latency/cost view are Workstream 4.
+- The sandbox cannot make local HTTP requests to the Streamlit socket, so endpoint verification was
+  done via process/port/log checks.
+
+Follow-up fix:
+
+- Added a project-root bootstrap to `langgraph_rag/app/streamlit_app.py` so `streamlit run
+  langgraph_rag/app/streamlit_app.py ...` can import `langgraph_rag` reliably even when Streamlit
+  executes the file as a script.
+- Rechecked:
+  - `/mnt/data/ubuntu/research/env/lang/bin/python -m py_compile langgraph_rag/app/streamlit_app.py langgraph_rag/app/ui_adapter.py`
+  - `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_ui_adapter.py -q`
+    -> **5 passed**.
+
+User verification:
+
+- User opened the web UI and confirmed it works on 2026-06-30.
+
+
+## UI Workstream 2 — Persistent Conversation Memory
+_2026-06-30_
+
+**Status: DONE.** Added local persistent chat sessions for the Streamlit UI.
+
+Implemented:
+
+- `langgraph_rag/app/session_store.py`: local JSON session storage helpers.
+- `langgraph_rag/app/streamlit_app.py`: sidebar controls for new/load/clear/delete chat sessions
+  and automatic save after each user/assistant turn.
+- `tests/test_session_store.py`: no-live-service tests for session persistence behavior.
+- `UI-PLAN.md`: Workstream 2 marked **DONE**.
+- `README.md`: documented local session storage path.
+
+Storage:
+
+- Directory: `data/ui/sessions/`.
+- Format: one JSON file per session.
+- Session fields:
+  - `id`
+  - `title`
+  - `created_at`
+  - `updated_at`
+  - `messages`
+- Message fields:
+  - `role`
+  - `content`
+  - `created_at`
+  - optional assistant `payload`
+- Assistant payloads preserve citations, final contexts, metrics, grounding, and trace details so
+  reloaded chats remain inspectable.
+
+UI behavior:
+
+- Users can create a new chat.
+- Users can load a saved chat from the sidebar.
+- Users can clear the current chat.
+- Users can delete the current chat.
+- Loaded messages are converted back to graph `chat_history`, so follow-up questions can use prior
+  turns after reload.
+- Session titles are derived from the first user message.
+- Storage is local-only; no external logging was added.
+
+Summarization:
+
+- Deferred. This first pass stores complete messages. Long-session summarization remains optional
+  future work if sessions grow large enough to pressure the query-rewrite context.
+
+Verification:
+
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_session_store.py tests/test_ui_adapter.py -q`
+  -> **9 passed**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q`
+  -> **35 passed, 3 skipped**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m py_compile langgraph_rag/app/streamlit_app.py langgraph_rag/app/ui_adapter.py langgraph_rag/app/session_store.py`
+  -> passed.
+
+A/B:
+
+- Not applicable for this workstream. Persistent memory changes UI/session behavior but does not
+  change retrieval, reranking, generation, or eval metrics.
+
+Before/after behavior:
+
+- Before: refreshing/restarting the UI lost the chat.
+- After: sessions persist in `data/ui/sessions/` and can be reloaded from the UI sidebar.
+
+Current local server:
+
+- PID: `2823094`
+- URL: `http://localhost:8501`
+- Log: `logs/streamlit_ui.log`
+
+
+## UI Workstream 3 — Human Feedback Loop
+_2026-06-30_
+
+**Status: DONE.** Added local per-answer feedback capture for the Streamlit UI.
+
+Implemented:
+
+- `langgraph_rag/app/feedback_store.py`: append-only JSONL feedback queue helpers.
+- `langgraph_rag/app/streamlit_app.py`: per-assistant-answer feedback controls with positive,
+  negative, and optional free-text comment inputs.
+- `tests/test_feedback_store.py`: no-live-service tests for feedback record and JSONL behavior.
+- `UI-PLAN.md`: Workstream 3 marked **DONE**.
+- `README.md`: documented feedback storage path and current test status.
+
+Storage:
+
+- File: `data/ui/feedback.jsonl`.
+- Format: one JSON object per feedback submission.
+- Records include:
+  - feedback id and UTC timestamp
+  - `review_status`
+  - session id and turn id
+  - user message index/id and assistant message index/id
+  - query and answer text
+  - label: `positive` or `negative`
+  - optional reviewer/user comment
+  - citations
+  - final context ids
+  - source URLs
+  - trace, metrics, top score, total latency, and abstention flag
+
+UI behavior:
+
+- Each assistant response has a Feedback expander.
+- Users can submit positive or negative feedback.
+- Users can add an optional comment before submitting.
+- Saved feedback is independent from saved chat sessions, so reviewing the queue does not mutate
+  `data/ui/sessions/`.
+- Negative examples can be filtered with `load_feedback(path, label="negative")`.
+
+Current local server:
+
+- PID: `2892838`
+- URL: `http://localhost:8501`
+- Log: `logs/streamlit_ui.log`
+
+Verification:
+
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_feedback_store.py tests/test_session_store.py tests/test_ui_adapter.py -q`
+  -> **14 passed**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q`
+  -> **40 passed, 3 skipped**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m py_compile langgraph_rag/app/streamlit_app.py langgraph_rag/app/ui_adapter.py langgraph_rag/app/session_store.py langgraph_rag/app/feedback_store.py`
+  -> passed.
+
+A/B:
+
+- Not applicable for this first logging pass. The feedback queue is now in place so later prompt,
+  retrieval, or UI variants can compare positive/negative rates against the same JSONL schema.
+
+
+## UI Workstream 4 — Latency Counter Slice
+_2026-06-30_
+
+**Status: DEFERRED after requested slice.** Implemented the visible latency-counter portion of
+Workstream 4 and deferred caching/cost work by user request so the project can move to the
+Eval/Admin dashboard.
+
+Implemented:
+
+- `langgraph_rag/app/ui_adapter.py`: added `stage_latency_ms(...)`.
+- `langgraph_rag/app/streamlit_app.py`: Trace panel now shows:
+  - retrieval latency
+  - rerank latency
+  - generation latency
+  - web latency
+  - total latency
+- `tests/test_ui_adapter.py`: added coverage for per-stage latency extraction and missing-stage
+  defaults.
+- `UI-PLAN.md`: Workstream 4 marked **DEFERRED** with latency slice completed and caching/cost
+  scope postponed.
+
+Deferred by request:
+
+- query embedding cache
+- retrieval/rerank cache
+- exact-answer cache
+- cache keys and invalidation rules
+- token/cost estimates
+- before/after cache latency comparison
+
+Verification:
+
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_ui_adapter.py -q`
+  -> **6 passed**.
+
+A/B:
+
+- Not applicable for this latency-only UI slice. It exposes existing trace timings and does not
+  change retrieval, reranking, generation, or answer content.
+
+
+## UI Workstream 5 — Eval/Admin Dashboard
+_2026-06-30_
+
+**Status: DONE.** Added a local Admin view for evaluation reports, A/B deltas, sample answers,
+feedback review, and source artifact paths.
+
+Implemented:
+
+- `langgraph_rag/app/admin_dashboard.py`: pure loader/summary helpers for report JSON,
+  A/B deltas, sample-answer markdown, and feedback JSONL.
+- `langgraph_rag/app/streamlit_app.py`: sidebar view switch between Chat and Admin.
+- `tests/test_admin_dashboard.py`: no-live-service tests for dashboard payload construction.
+- `README.md`: documented the Admin view and updated test status.
+- `UI-PLAN.md`: Workstream 5 marked **DONE**.
+
+Dashboard tabs:
+
+- Corpus-only eval: key metric cards plus flattened metric table.
+- Web-augmented eval: key metric cards plus flattened metric table.
+- A/B: rows from `reports/eval_report_ab.json`.
+- Feedback: total/positive/negative/new counts plus recent review records, defaulting to negative
+  examples.
+- Samples: rendered `reports/sample_answers_corpus_only.md`.
+- Files: source artifact paths and existence checks.
+
+Design notes:
+
+- The dashboard reads existing artifacts and does not recompute hidden metrics.
+- A/B deltas come directly from `reports/eval_report_ab.json`.
+- Feedback records come from `data/ui/feedback.jsonl`.
+- The A/B tab highlights current caveats:
+  - current web provider produced no final web evidence
+  - recency questions can be stale in corpus-only/default mode
+  - judge validation is a smoke test, not production human review
+
+Current local server:
+
+- PID: `3069661`
+- URL: `http://localhost:8501`
+- Log: `logs/streamlit_ui.log`
+
+Verification:
+
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_admin_dashboard.py tests/test_ui_adapter.py -q`
+  -> **11 passed**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q`
+  -> **46 passed, 3 skipped**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m py_compile langgraph_rag/app/streamlit_app.py langgraph_rag/app/ui_adapter.py langgraph_rag/app/admin_dashboard.py`
+  -> passed.
+
+A/B:
+
+- Existing A/B report is displayed as-is. The dashboard does not introduce another evaluation
+  calculation path, so it cannot drift from the saved report JSON.
