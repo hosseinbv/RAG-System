@@ -284,7 +284,6 @@ See [reports/eval_report_ab.md](reports/eval_report_ab.md) for the exact metric 
 
 ## Useful Project Documents
 
-- [PLAN.md](PLAN.md): phase-by-phase build plan, current status, design principles, and future work.
 - [reports/BUILD_REPORT.md](reports/BUILD_REPORT.md): append-only build/eval log with decisions,
   metrics, artifacts, and follow-up notes.
 - [reports/eval_report_ab.md](reports/eval_report_ab.md): corpus-only vs web-augmented comparison.
