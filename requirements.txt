@@ -1,0 +1,23 @@
+# Orchestration env (no torch/vllm here — models are served separately over
+# OpenAI-compatible HTTP). Install with: pip install -r requirements.txt
+#
+# --- ingestion ---
+trafilatura>=1.8
+beautifulsoup4>=4.12
+lxml>=5.0
+lxml_html_clean
+# --- retrieval / orchestration ---
+rank_bm25>=0.2.2
+openai>=1.40            # client for vLLM OpenAI-compatible endpoints
+httpx>=0.27             # web retrieval + reranker endpoint calls
+langgraph>=0.2          # graph orchestration (added in Phase 2)
+langchain-core>=0.3     # message types used by langgraph
+chromadb>=0.5           # vector store (added in Phase 1b)
+# --- eval ---
+ragas>=0.2              # added in Phase 4 (optional; custom metrics also provided)
+# --- common ---
+pyyaml>=6.0
+numpy>=1.26
+pandas>=2.0
+tqdm>=4.66
+pytest>=8.0

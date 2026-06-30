@@ -1,0 +1,79 @@
+digraph LangGraphRagSystem {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    label="LangGraph RAG System: Corpus-first runtime with optional web augmentation",
+    labelloc=t,
+    fontsize=20,
+    fontname="Helvetica",
+    nodesep=0.45,
+    ranksep=0.7
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#eef4ff",
+    color="#335c9c",
+    penwidth=1.4,
+    fontname="Helvetica",
+    fontsize=11,
+    margin="0.12,0.08"
+  ];
+
+  edge [
+    color="#334155",
+    penwidth=1.3,
+    arrowsize=0.8,
+    fontname="Helvetica",
+    fontsize=10
+  ];
+
+  start [shape=oval, label="User query", fillcolor="#f8fafc", color="#475569"];
+  rewrite [label="rewrite\nConversationRewriter"];
+  retrieve [label="retrieve\nHybrid corpus retriever"];
+  rerank [label="rerank\nQwen reranker"];
+  decide_web [label="decide_web\nconfidence + recency gate"];
+  web_retrieve [label="web_retrieve\nAutodesk-only web search", fillcolor="#fff7ed", color="#c2410c"];
+  merge_contexts [label="merge_contexts\ncorpus + web final rerank", fillcolor="#fff7ed", color="#c2410c"];
+  finalize [label="finalize_contexts"];
+  abstain_gate [shape=diamond, label="abstain_gate\nconfidence check", fillcolor="#fefce8", color="#a16207"];
+  abstain [label="abstain_response"];
+  generate [label="generate\nQwen generator"];
+  ground [label="ground\nGroundingGuard"];
+  answer [shape=oval, label="Final answer\n+ citations", fillcolor="#f8fafc", color="#475569"];
+
+  pages [label="HTML corpus\npages/", fillcolor="#ecfdf5", color="#047857"];
+  ingest [label="ingest + chunk\nheading-aware chunks", fillcolor="#ecfdf5", color="#047857"];
+  indexes [label="BM25 + dense indexes\ndata/", fillcolor="#ecfdf5", color="#047857"];
+  embed_model [label="vLLM embedding\nQwen3-Embedding-0.6B", fillcolor="#f5f3ff", color="#6d28d9"];
+  rerank_model [label="vLLM reranker\nQwen3-Reranker-0.6B", fillcolor="#f5f3ff", color="#6d28d9"];
+  gen_model [label="vLLM generator\nQwen3-4B-Instruct", fillcolor="#f5f3ff", color="#6d28d9"];
+  judge_model [label="vLLM judge\nQwen3-8B", fillcolor="#f5f3ff", color="#6d28d9"];
+  web_provider [label="DuckDuckGo HTML\nallowed domain: autodesk.com", fillcolor="#fff7ed", color="#c2410c"];
+  eval [label="eval/run_eval.py\ncorpus_only vs web_augmented", fillcolor="#f1f5f9", color="#475569"];
+
+  start -> rewrite -> retrieve -> rerank -> decide_web;
+  decide_web -> finalize [label="corpus confident\nor web off"];
+  decide_web -> web_retrieve [style=dashed, color="#c2410c", label="recency or\nlow confidence"];
+  web_retrieve -> merge_contexts [style=dashed, color="#c2410c"];
+  merge_contexts -> finalize [style=dashed, color="#c2410c"];
+  finalize -> abstain_gate;
+  abstain_gate -> generate [label="answer"];
+  abstain_gate -> abstain [style=dotted, label="abstain"];
+  generate -> ground -> answer;
+  abstain -> ground;
+
+  pages -> ingest -> indexes -> retrieve [color="#047857"];
+  embed_model -> indexes [style=dotted, color="#6d28d9", label="embeddings"];
+  rerank_model -> rerank [style=dotted, color="#6d28d9"];
+  rerank_model -> merge_contexts [style=dotted, color="#6d28d9"];
+  gen_model -> generate [style=dotted, color="#6d28d9"];
+  web_provider -> web_retrieve [style=dotted, color="#c2410c"];
+  answer -> eval [style=dotted, color="#64748b"];
+  judge_model -> eval [style=dotted, color="#6d28d9"];
+
+  { rank=same; pages; embed_model; web_provider; }
+  { rank=same; retrieve; rerank; decide_web; }
+  { rank=same; abstain; generate; }
+}

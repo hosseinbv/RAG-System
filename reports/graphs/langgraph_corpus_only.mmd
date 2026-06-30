@@ -1,0 +1,25 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	retrieve(retrieve)
+	rerank(rerank)
+	generate(generate)
+	rewrite(rewrite)
+	abstain_response(abstain_response)
+	ground(ground)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> rewrite;
+	abstain_response --> ground;
+	generate --> ground;
+	rerank -. &nbsp;abstain&nbsp; .-> abstain_response;
+	rerank -. &nbsp;answer&nbsp; .-> generate;
+	retrieve --> rerank;
+	rewrite --> retrieve;
+	ground --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

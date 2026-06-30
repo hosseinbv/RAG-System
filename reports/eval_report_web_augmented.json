@@ -1,0 +1,122 @@
+{
+  "result": {
+    "condition": "web_augmented",
+    "n_items": 48,
+    "retrieval": {
+      "mrr": 0.745,
+      "recall@1": 0.35,
+      "hit@1": 0.625,
+      "ndcg@1": 0.625,
+      "recall@3": 0.6771,
+      "hit@3": 0.85,
+      "ndcg@3": 0.6567,
+      "recall@5": 0.7771,
+      "hit@5": 0.925,
+      "ndcg@5": 0.7035,
+      "recall@10": 0.9208,
+      "hit@10": 0.975,
+      "ndcg@10": 0.7621
+    },
+    "generation": {
+      "faithfulness": 0.97,
+      "answer_relevance": 0.9925
+    },
+    "citation": {
+      "has_citation_rate": 0.975,
+      "gold_doc_cited_rate": 0.647
+    },
+    "abstention": {
+      "abstain_recall_on_unanswerable": 1.0,
+      "false_abstain_rate_on_answerable": 0.0
+    },
+    "web": {
+      "trigger_rate": 0.042,
+      "web_result_rate": 0.0,
+      "final_web_context_rate": 0.0
+    },
+    "system": {
+      "latency_ms_mean": 2119,
+      "latency_ms_p90": 4565
+    }
+  },
+  "judge_validation": {
+    "accuracy": 1.0,
+    "cohen_kappa": 1.0,
+    "n": 12,
+    "threshold": 0.5,
+    "rows": [
+      {
+        "q": "Does AutoCAD LT do 3D?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "Is Fusion 360 cloud-based?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "What is Maya used for?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "Does Revit support BIM?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "What does Civil 3D do?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "Price of AutoCAD?",
+        "human": 1,
+        "judge_faithfulness": 1.0,
+        "pred": 1
+      },
+      {
+        "q": "How much does Fusion 360 cost?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      },
+      {
+        "q": "Does AutoCAD LT do 3D?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      },
+      {
+        "q": "What is Maya's latest version?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      },
+      {
+        "q": "Is Revit free?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      },
+      {
+        "q": "Does Inventor run on Linux?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      },
+      {
+        "q": "What is Navisworks?",
+        "human": 0,
+        "judge_faithfulness": 0.0,
+        "pred": 0
+      }
+    ]
+  }
+}

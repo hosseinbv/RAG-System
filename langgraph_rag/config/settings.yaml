@@ -1,0 +1,93 @@
+# Single source of truth for the system. Nodes/components read from here.
+# Toggle `enabled` on any optional component to add/remove it without code changes.
+
+paths:
+  corpus_dir: /home/ubuntu/research/langgraph/pages
+  work_dir: /home/ubuntu/research/langgraph/data
+  reports_dir: /home/ubuntu/research/langgraph/reports
+  snapshot_date: "2023-12-16"   # crawl date of the corpus; used for recency reasoning
+
+# All models are reached over an OpenAI-compatible API (served by vLLM).
+# Swap a model by changing `model` / `base_url` here — no code edits elsewhere.
+models:
+  generator:
+    base_url: http://localhost:8001/v1
+    model: Qwen3-4B-Instruct-2507
+    api_key: EMPTY
+    max_tokens: 1024
+    temperature: 0.2
+  embedding:
+    base_url: http://localhost:8002/v1
+    model: Qwen3-Embedding-0.6B
+    api_key: EMPTY
+    dim: 1024
+  reranker:
+    base_url: http://localhost:8003
+    model: Qwen3-Reranker-0.6B
+    api_key: EMPTY
+  judge:                         # MUST differ from generator (avoid self-eval bias)
+    base_url: http://localhost:8004/v1
+    model: Qwen3-8B
+    api_key: EMPTY
+    temperature: 0.0
+
+ingest:
+  min_bytes: 3072                # drop files smaller than this (junk/redirects)
+  english_only: true
+  drop_page_types: [company, legal, terms-of-use]   # low customer-question value
+  chunk:
+    target_tokens: 512
+    overlap_tokens: 64
+    heading_aware: true
+
+retrieval:
+  top_k: 20                      # candidates from hybrid retrieval
+  hybrid:
+    enabled: true
+    dense_weight: 0.5            # RRF is rank-based; weights used only if weighted-sum mode
+    bm25_weight: 0.5
+    rrf_k: 60
+
+rerank:
+  enabled: true
+  top_n: 5                       # passed to the generator after reranking
+
+web:
+  enabled: false                 # Phase 5; confidence-driven fallback, not upfront routing
+  provider: duckduckgo_html      # no-key fallback; can be swapped for Brave/Serper/Tavily later
+  allowed_domains: [autodesk.com]
+  top_k: 5
+  fetch_pages: true
+  timeout_s: 8
+  max_chars_per_page: 4500
+  trigger_max_score: 0.35        # if best corpus rerank score < this and in-domain -> consider web
+  recency_terms: [latest, newest, current, today, release, released, version, versions]
+  in_domain_terms:
+    - autodesk
+    - autocad
+    - revit
+    - fusion
+    - fusion 360
+    - maya
+    - 3ds max
+    - civil 3d
+    - inventor
+    - navisworks
+    - infraworks
+    - moldflow
+    - bim
+    - cad
+    - cam
+
+guards:
+  conversation_rewrite:
+    enabled: true
+  abstention:
+    enabled: true
+    min_rerank_score: 0.30       # below this -> abstain ("not in the documentation")
+  grounding:
+    enabled: true
+
+eval:
+  golden_set_path: /home/ubuntu/research/langgraph/data/golden_set.jsonl
+  k_values: [1, 3, 5, 10]

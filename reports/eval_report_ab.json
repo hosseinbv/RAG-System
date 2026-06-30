@@ -1,0 +1,156 @@
+{
+  "corpus_only": {
+    "condition": "corpus_only",
+    "n_items": 48,
+    "retrieval": {
+      "mrr": 0.745,
+      "recall@1": 0.35,
+      "hit@1": 0.625,
+      "ndcg@1": 0.625,
+      "recall@3": 0.6771,
+      "hit@3": 0.85,
+      "ndcg@3": 0.6567,
+      "recall@5": 0.7771,
+      "hit@5": 0.925,
+      "ndcg@5": 0.7035,
+      "recall@10": 0.9208,
+      "hit@10": 0.975,
+      "ndcg@10": 0.7621
+    },
+    "generation": {
+      "faithfulness": 0.9712,
+      "answer_relevance": 0.9963
+    },
+    "citation": {
+      "has_citation_rate": 0.975,
+      "gold_doc_cited_rate": 0.647
+    },
+    "abstention": {
+      "abstain_recall_on_unanswerable": 1.0,
+      "false_abstain_rate_on_answerable": 0.0
+    },
+    "web": {
+      "trigger_rate": 0.0,
+      "web_result_rate": 0.0,
+      "final_web_context_rate": 0.0
+    },
+    "system": {
+      "latency_ms_mean": 2152,
+      "latency_ms_p90": 4616
+    }
+  },
+  "web_augmented": {
+    "condition": "web_augmented",
+    "n_items": 48,
+    "retrieval": {
+      "mrr": 0.745,
+      "recall@1": 0.35,
+      "hit@1": 0.625,
+      "ndcg@1": 0.625,
+      "recall@3": 0.6771,
+      "hit@3": 0.85,
+      "ndcg@3": 0.6567,
+      "recall@5": 0.7771,
+      "hit@5": 0.925,
+      "ndcg@5": 0.7035,
+      "recall@10": 0.9208,
+      "hit@10": 0.975,
+      "ndcg@10": 0.7621
+    },
+    "generation": {
+      "faithfulness": 0.97,
+      "answer_relevance": 0.9925
+    },
+    "citation": {
+      "has_citation_rate": 0.975,
+      "gold_doc_cited_rate": 0.647
+    },
+    "abstention": {
+      "abstain_recall_on_unanswerable": 1.0,
+      "false_abstain_rate_on_answerable": 0.0
+    },
+    "web": {
+      "trigger_rate": 0.042,
+      "web_result_rate": 0.0,
+      "final_web_context_rate": 0.0
+    },
+    "system": {
+      "latency_ms_mean": 2119,
+      "latency_ms_p90": 4565
+    }
+  },
+  "rows": [
+    [
+      "mrr",
+      0.745,
+      0.745,
+      0.0
+    ],
+    [
+      "hit@10",
+      0.975,
+      0.975,
+      0.0
+    ],
+    [
+      "faithfulness",
+      0.9712,
+      0.97,
+      -0.0012
+    ],
+    [
+      "answer_relevance",
+      0.9963,
+      0.9925,
+      -0.0038
+    ],
+    [
+      "has_citation_rate",
+      0.975,
+      0.975,
+      0.0
+    ],
+    [
+      "gold_doc_cited_rate",
+      0.647,
+      0.647,
+      0.0
+    ],
+    [
+      "abstain_recall",
+      1.0,
+      1.0,
+      0.0
+    ],
+    [
+      "false_abstain",
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      "latency_mean_ms",
+      2152,
+      2119,
+      -33
+    ],
+    [
+      "latency_p90_ms",
+      4616,
+      4565,
+      -51
+    ],
+    [
+      "web_trigger_rate",
+      0.0,
+      0.042,
+      0.042
+    ],
+    [
+      "final_web_context_rate",
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}
