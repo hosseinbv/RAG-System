@@ -107,29 +107,6 @@ The project uses two layers:
    tests, and eval orchestration.
 2. **Model-serving environment:** vLLM servers expose OpenAI-compatible HTTP endpoints.
 
-On this machine, the working orchestration interpreter is:
-
-```bash
-/mnt/data/ubuntu/research/env/lang/bin/python
-```
-
-### Existing Machine
-
-Use the existing env:
-
-```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q
-```
-
-If you prefer to activate it:
-
-```bash
-source /mnt/data/ubuntu/research/env/lang/bin/activate
-cd /home/ubuntu/research/langgraph
-python -m pytest -q
-```
-
 ### Fresh Orchestration Env
 
 From a clean machine with conda:
@@ -137,7 +114,8 @@ From a clean machine with conda:
 ```bash
 conda create -n langgraph-rag python=3.11 -y
 conda activate langgraph-rag
-cd /home/ubuntu/research/langgraph
+git clone git@github.com:hosseinbv/RAG-System.git
+cd RAG-System
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pytest -q
@@ -183,7 +161,7 @@ bash serve_models.sh status
 The script defaults to `GPU=4`. Override it if needed:
 
 ```bash
-GPU=4 bash serve_models.sh eval
+bash serve_models.sh eval
 ```
 
 Logs are written under [logs/](logs/).
@@ -200,15 +178,13 @@ cd /home/ubuntu/research/langgraph
 Then rebuild chunks:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.ingest.chunk
+python -m langgraph_rag.ingest.chunk
 ```
 
 Then rebuild indexes:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.ingest.build_index
+python -m langgraph_rag.ingest.build_index
 ```
 
 Index building consumes `data/chunks.jsonl` and requires the embedding service on port `8002`.
@@ -218,22 +194,19 @@ Index building consumes `data/chunks.jsonl` and requires the embedding service o
 Single query:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.app.cli "What does Fusion 360 do?"
+python -m langgraph_rag.app.cli "What does Fusion 360 do?"
 ```
 
 Interactive mode:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.app.cli
+python -m langgraph_rag.app.cli
 ```
 
 Generate the current sample-answer report:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.app.run_samples
+python -m langgraph_rag.app.run_samples
 ```
 
 Sample outputs are documented in
@@ -244,8 +217,7 @@ Sample outputs are documented in
 Offline/unit test suite:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q
+python -m pytest -q
 ```
 
 Current verification status:
@@ -260,8 +232,7 @@ internet access.
 Run a focused phase test:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_phase5_web.py -q
+python -m pytest tests/test_phase5_web.py -q
 ```
 
 ## Run Evaluation
@@ -272,22 +243,19 @@ The golden set lives at [data/golden_set.jsonl](data/golden_set.jsonl). It curre
 Run corpus-only eval:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.eval.run_eval --condition corpus_only
+python -m langgraph_rag.eval.run_eval --condition corpus_only
 ```
 
 Run web-augmented eval:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.eval.run_eval --condition web_augmented
+python -m langgraph_rag.eval.run_eval --condition web_augmented
 ```
 
 Run a smaller smoke eval:
 
 ```bash
-cd /home/ubuntu/research/langgraph
-/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.eval.run_eval --condition corpus_only --limit 10
+python -m langgraph_rag.eval.run_eval --condition corpus_only --limit 10
 ```
 
 Evaluation writes:
