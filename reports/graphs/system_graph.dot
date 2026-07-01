@@ -2,7 +2,7 @@ digraph LangGraphRagSystem {
   graph [
     rankdir=TB,
     bgcolor="white",
-    label="LangGraph RAG System: Corpus-first runtime with optional web augmentation",
+    label="LangGraph RAG System: Corpus-first documentation runtime with optional web augmentation",
     labelloc=t,
     fontsize=20,
     fontname="Helvetica",
@@ -34,7 +34,7 @@ digraph LangGraphRagSystem {
   retrieve [label="retrieve\nHybrid corpus retriever"];
   rerank [label="rerank\nQwen reranker"];
   decide_web [label="decide_web\nconfidence + recency gate"];
-  web_retrieve [label="web_retrieve\nAutodesk-only web search", fillcolor="#fff7ed", color="#c2410c"];
+  web_retrieve [label="web_retrieve\ndomain-limited web search", fillcolor="#fff7ed", color="#c2410c"];
   merge_contexts [label="merge_contexts\ncorpus + web final rerank", fillcolor="#fff7ed", color="#c2410c"];
   finalize [label="finalize_contexts"];
   abstain_gate [shape=diamond, label="abstain_gate\nconfidence check", fillcolor="#fefce8", color="#a16207"];
@@ -50,7 +50,7 @@ digraph LangGraphRagSystem {
   rerank_model [label="vLLM reranker\nQwen3-Reranker-0.6B", fillcolor="#f5f3ff", color="#6d28d9"];
   gen_model [label="vLLM generator\nQwen3-4B-Instruct", fillcolor="#f5f3ff", color="#6d28d9"];
   judge_model [label="vLLM judge\nQwen3-8B", fillcolor="#f5f3ff", color="#6d28d9"];
-  web_provider [label="DuckDuckGo HTML\nallowed domain: autodesk.com", fillcolor="#fff7ed", color="#c2410c"];
+  web_provider [label="DuckDuckGo HTML\nconfigured documentation domain", fillcolor="#fff7ed", color="#c2410c"];
   eval [label="eval/run_eval.py\ncorpus_only vs web_augmented", fillcolor="#f1f5f9", color="#475569"];
 
   start -> rewrite -> retrieve -> rerank -> decide_web;

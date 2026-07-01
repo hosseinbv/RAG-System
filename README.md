@@ -2,7 +2,9 @@
 
 ![System graph](reports/graphs/system_graph.svg)
 
-This project is a corpus-first RAG chatbot over an Autodesk HTML snapshot. It uses
+![Demo video](demo/demo1.gif)
+
+This project is a corpus-first RAG chatbot over an HTML snapshot. It uses
 LangGraph for orchestration, hybrid retrieval over a cleaned local corpus, Qwen/vLLM
 model services for embedding, reranking, generation, and judging, plus an evaluation
 harness for corpus-only and optional web-augmented runs.
@@ -98,6 +100,15 @@ Graph artifacts:
 - [reports/graphs/system_graph.png](reports/graphs/system_graph.png)
 - [reports/graphs/langgraph_corpus_only.mmd](reports/graphs/langgraph_corpus_only.mmd)
 - [reports/graphs/langgraph_web_augmented.mmd](reports/graphs/langgraph_web_augmented.mmd)
+
+Regenerate graph artifacts:
+
+```bash
+python -m langgraph_rag.obs.render_graphs
+```
+
+This rewrites the Graphviz DOT source, SVG/PNG architecture images, and the two compiled
+LangGraph Mermaid diagrams. SVG/PNG rendering requires the system `dot` binary from Graphviz.
 
 ## Environment Setup
 
@@ -250,7 +261,7 @@ python -m pytest -q
 Current verification status:
 
 ```text
-46 passed, 3 skipped
+48 passed, 3 skipped
 ```
 
 The skipped tests are gated integration/live-service checks. Unit tests do not require live
@@ -311,6 +322,8 @@ See [reports/eval_report_ab.md](reports/eval_report_ab.md) for the exact metric 
 
 ## Useful Project Documents
 
+- [reports/project_report.pdf](reports/project_report.pdf): compiled LaTeX project report with
+  architecture, core metrics, results interpretation, and future-work directions.
 - [reports/BUILD_REPORT.md](reports/BUILD_REPORT.md): append-only build/eval log with decisions,
   metrics, artifacts, and follow-up notes.
 - [reports/eval_report_ab.md](reports/eval_report_ab.md): corpus-only vs web-augmented comparison.
@@ -349,5 +362,5 @@ web:
 - The corpus snapshot is from Dec 2023, so recency questions can be stale.
 - Web augmentation is implemented but should stay disabled until the provider/query layer is improved.
 - The LLM judge validation set is a small smoke test, not a production-grade human annotation set.
-- `gold_doc_cited_rate` is intentionally strict: a faithful answer can cite an overlapping Autodesk
+- `gold_doc_cited_rate` is intentionally strict: a faithful answer can cite an overlapping 
   page and still miss the exact synthetic gold document.

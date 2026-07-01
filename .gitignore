@@ -8,3 +8,7 @@ run-ui.txt
 logs/
 __pycache__/
 *.py[cod]
+erase_gpus.sh
+*.aux
+*.out
+*.toc

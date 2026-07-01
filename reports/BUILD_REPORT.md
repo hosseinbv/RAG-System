@@ -273,8 +273,7 @@ _2026-06-29 16:17:17_
 Investigated the 238 `empty_after_extraction` drops (169 are `/support/technical` KB
 pages). Confirmed they are **client-side-rendered shells**: ~29 visible chars, ~35 KB of
 src-based scripts, no `__NEXT_DATA__` / JSON-LD / inline JSON. The article body was never
-in the static crawl, so it is unrecoverable without a headless browser render. Dropping
-them is correct. (We still keep 85 support pages that *do* carry static content.)
+in the static crawl, so it is unrecoverable without a headless browser render.
 
 **Implication / future work:** to cover the support KB, re-crawl those URLs with a JS-capable
 fetcher (Playwright) — listed in the optional plan, not blocking the PoC.
@@ -1353,3 +1352,131 @@ A/B:
 
 - Existing A/B report is displayed as-is. The dashboard does not introduce another evaluation
   calculation path, so it cannot drift from the saved report JSON.
+
+
+## Graph Artifact Regeneration Command
+_2026-07-01_
+
+**Status: DONE.** Added a repeatable command for regenerating architecture and compiled
+LangGraph diagrams.
+
+Implemented:
+
+- `langgraph_rag/obs/render_graphs.py`: writes `reports/graphs/system_graph.dot`, renders
+  `system_graph.svg` and `system_graph.png` with Graphviz, and regenerates:
+  - `reports/graphs/langgraph_corpus_only.mmd`
+  - `reports/graphs/langgraph_web_augmented.mmd`
+- `tests/test_render_graphs.py`: tests source regeneration without Graphviz and verifies the
+  compiled Mermaid output changes when `web.enabled` is toggled.
+- `reports/graphs/README.md`: documented the regeneration command.
+- `README.md`: added graph regeneration command and updated test status.
+
+Command:
+
+```bash
+python -m langgraph_rag.obs.render_graphs
+```
+
+Notes:
+
+- The command does not require live model services.
+- DOT and Mermaid files are always rewritten.
+- SVG/PNG rendering requires the system `dot` binary from Graphviz.
+
+Verification:
+
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m langgraph_rag.obs.render_graphs`
+  -> rendered `system_graph.svg` and `system_graph.png`.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest tests/test_render_graphs.py -q`
+  -> **2 passed**.
+- `/mnt/data/ubuntu/research/env/lang/bin/python -m pytest -q`
+  -> **48 passed, 3 skipped**.
+
+
+## Expanded LaTeX Project Report
+_2026-07-01_
+
+**Status: DONE.** Expanded the LaTeX report for the current RAG system and
+generalized the wording so the report does not depend on a named vendor or
+domain.
+
+Artifacts:
+
+- `reports/project_report.tex`
+- `reports/project_report.pdf`
+
+Report contents:
+
+- project overview
+- corpus preparation statistics
+- system graph figure from `reports/graphs/system_graph.png`
+- exact model roles and rationale:
+  `Qwen3-Embedding-0.6B`, `Qwen3-Reranker-0.6B`,
+  `Qwen3-4B-Instruct-2507`, and `Qwen3-8B`
+- retrieval and generation pipeline explanation
+- corpus-only vs web-augmented evaluation results
+- future work covering million-document retrieval scaling and label-agnostic
+  evaluation without gold labels or judge models
+- reproducibility commands
+- appendix covering chatbot UI features
+
+The report uses `\tableofcontents`, so new sections will appear in the contents
+automatically after recompiling LaTeX. The system graph source was also
+regenerated with generic labels for the web-augmentation branch.
+
+Verification:
+
+- `pdflatex -interaction=nonstopmode -halt-on-error -output-directory reports reports/project_report.tex`
+  -> built `reports/project_report.pdf`.
+- second `pdflatex` pass
+  -> refreshed the table of contents and PDF links.
+- vendor-name scan across `reports/project_report.tex`, graph artifacts, and
+  `langgraph_rag/obs/render_graphs.py`
+  -> no matches.
+
+
+## LaTeX Report Rerender After Weak-Label Evaluation Appendix
+_2026-07-01_
+
+**Status: DONE.** Re-rendered the project report after adding the hierarchical
+weak-label evaluation appendix.
+
+Fixes:
+
+- added `amsmath` and `amssymb` for the new display equations;
+- converted Markdown-style display math brackets to valid LaTeX display math;
+- fixed malformed set, centroid, cluster, common-prefix, and cases equations;
+- removed an unsupported citation command from the appendix text;
+- generalized product examples in the new appendix.
+
+Verification:
+
+- `pdflatex -interaction=nonstopmode -halt-on-error -output-directory reports reports/project_report.tex`
+  -> built `reports/project_report.pdf`.
+- second `pdflatex` pass
+  -> refreshed the table of contents and cross references.
+- scan of `reports/project_report.tex` and `reports/project_report.log`
+  -> no fatal LaTeX errors or leftover appendix-specific product names.
+
+
+## LaTeX Report Abstract Update
+_2026-07-01_
+
+**Status: DONE.** Updated the abstract to summarize core results numerically and
+state the recommended solution direction.
+
+Abstract now includes:
+
+- corpus preparation scale: 1,218 raw files, 729 kept documents, 1,494 indexed chunks;
+- 48-item evaluation results: MRR, Recall@10, Hit@10, faithfulness, answer relevance,
+  citation presence, abstention recall, false abstention rate, and mean latency;
+- web-augmentation A/B conclusion: web search triggered on 4.2% of queries but added no
+  final web context in this run;
+- recommended direction: corpus-only operation for now, stronger freshness/web policy,
+  ANN scaling for larger corpora, and label-agnostic monitoring.
+
+Verification:
+
+- two `pdflatex -interaction=nonstopmode -halt-on-error -output-directory reports reports/project_report.tex`
+  passes
+  -> rebuilt `reports/project_report.pdf` and refreshed table-of-contents links.
